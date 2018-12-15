@@ -1,24 +1,15 @@
-
-/*
- * 本题使用欧拉线性筛，详细资料可以自行谷歌/百度
- * 好像做的有点麻烦。。。实际上穷举就可以过
- */
 #include<stdio.h>
-#include<math.h>
-
+int n;
+int in[105];
+long long f[500005];
+int i,j;
 int main(){
-	long long t,x,y,ans;
-	long long num,num_sqrt, i;
-	double esp=1e-9;
-	scanf("%lld",&t);
-	while(t--){
-		scanf("%lld%lld",&x,&y);
-		num=x*y, ans=0, num_sqrt=sqrt(num)+esp;
-		if(num_sqrt*num_sqrt==num)ans--;
-		for(i=1;i<=num_sqrt;i++){
-			if((num/i)*i==num)ans+=2;
-		}
-		printf("%lld\n",ans);
-	}
-	return 0;
+    scanf("%d",&n);
+    for(i=0;i<n;i++)
+        scanf("%d",in+i),j=in[i]>j?in[i]:j;
+    for(f[1]=f[2]=f[3]=1,i=4;i<=j;i++)
+        f[i]=f[i-2]+f[i-3],f[i]%=100000007;
+    for(i=0;i<n;i++)
+        printf("%lld\n",f[in[i]]);
+    return 0;
 }

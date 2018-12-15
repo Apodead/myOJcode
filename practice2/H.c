@@ -1,39 +1,47 @@
 #include<stdio.h>
-
-struct A{
-	int num,times;
-}buf[1005],num[1005];
-void merge_sort(int l, int r){
-	int i,j,k;
-	if(l>=r)return;
-	merge_sort(l, (l+r)/2);
-	merge_sort((l+r)/2+1,r);
-	for(i=k=l,j=(l+r)/2+1;i<(l+r)/2+1&&j<=r;k++){
-		if(num[i].times<num[j].times)
-			buf[k]=num[j++];
-		else
-			buf[k]=num[i++];
-	}
-	if(k<=r){
-		while(i<(l+r)/2+1)buf[k++]=num[i++];
-		while(j<=r)buf[k++]=num[j++];
-	}
-	for(i=l;i<=r;i++)
-		num[i]=buf[i];
-}
-
 int main(){
-	int n;
-	int i,j;
+	int n,m;
+	int ans=0,tmp,num;
+	int i,flag;
+	char ch;
+	int wrongLine[1005];
 	scanf("%d",&n);
-	for(i=0;i<=1000;i++)num[i].num=i,num[i].times=0;
-	for(i=0;i<n;i++){
-		scanf("%d",&j);
-		num[j].times++;
+	for(i=1;i<=n;i++){
+		scanf("%d",&m);
+		num=tmp=flag=0;
+		m++;
+		while(m&&(ch=getchar())!='\n'){
+			switch(ch){
+				case '+':
+					num+=flag*tmp;
+					flag=1;
+					tmp=0;
+					break;
+				case '-':
+					num+=flag*tmp;
+					flag=-1;
+					tmp=0;
+					break;
+				case ' ':
+					m--;
+					break;
+				default:
+					tmp=tmp*10+ch-'0';
+			}
+			if(num<0){
+				wrongLine[ans++]=i;
+				break;
+			}
+		}
+		if(ch=='\n'){
+			num+=flag*tmp;
+			if(num<0)
+				wrongLine[ans++]=i;
+		}
 	}
-	merge_sort(0,1000);
-	for(i=0;i<=1000&&num[i].times;i++){
-		printf("%d %d\n",num[i].num,num[i].times);
+	printf("%d\n",ans);
+	for(i=0;i<ans;i++){
+		printf("%d\n",wrongLine[i]);
 	}
 	return 0;
 }

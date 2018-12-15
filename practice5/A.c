@@ -1,17 +1,13 @@
 #include<stdio.h>
 
-int main(){
-	long long n,x,a,sum;
-
-	sum=0;
-	scanf("%lld%lld",&n,&x);
-	for(;n>=0;n--){
-		scanf("%lld",&a);
-		sum*=x;
-		sum+=a;
-		sum%=1000000007;
-	}
-	printf("%lld",sum);
-	return 0;
+int solveF(int n, int r){
+    if(n<r)return 0;
+    if(n==1||r==1||n==r)return 1;
+    return solveF(n-1,r)*r+solveF(n-1,r-1);
 }
-
+int main(){
+    int n,r;
+    scanf("%d%d",&n,&r);
+    printf("%d",solveF(n,r));
+    return 0;
+}
