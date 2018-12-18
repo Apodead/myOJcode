@@ -260,3 +260,131 @@ int main(){
     return 0;
 }
 ```
+
+---
+
+## F 求和
+
+**解题思路**：第i个数字串为dddd...dd(一共ai个d)，按照题意构造数字串求和即可。
+
+代码如下
+
+```c
+#include <stdio.h>
+
+long long a[10], ans;
+int d, n;
+int geta(int len) {
+    if (!a[len])
+        for (int i = 0; i < len; i++) {
+            a[len] = a[len] * 10 + d;
+        }
+    return a[len];
+}
+int main() {
+    int i, tmp;
+    scanf("%d%d", &d, &n);
+    for (i = 0; i < n; i++) {
+        scanf("%d", &tmp);
+        ans += geta(tmp);
+    }
+    printf("%lld", ans);
+    return 0;
+}
+```
+
+---
+
+## G Max的最简真分数
+
+**解题思路**：从大到小穷举所有可能的情况即可。可通过求最大公约数来判断是否是真分数。
+
+代码如下
+
+```c
+#include <stdio.h>
+
+int n, a, b;
+int gcd(int a, int b) { return b ? gcd(b, a % b) : a; }
+int main() {
+    scanf("%d", &n);
+    for (a = n / 2, b = n - a; a && gcd(a, b) != 1; a--, b++)
+        ;
+    printf("%d %d", a, b);
+    return 0;
+}
+```
+
+---
+
+## H 熊大的座位表
+
+**解题思路**：容易找到规律：从左往右先是由大到小的第奇数个人直到第1个人，然后是从第2个人开始由小到大的第偶数个人。按照规律输出即可。
+
+代码如下
+
+```c
+#include <stdio.h>
+
+int n, a[1005];
+int main() {
+    int i;
+    scanf("%d", &n);
+    for (i = 1; i <= n; i++) {
+        scanf("%d", a + i);
+    }
+    i = n % 2 ? n : n - 1;
+    for (; i > 0; i -= 2) printf("%d ", a[i]);
+    for (i = 2; i <= n; i += 2) printf("%d ", a[i]);
+    return 0;
+}
+```
+
+---
+
+## I F7
+
+**解题思路**：注意到总冠军可能的得分显然有一个最小值，因此我们先将选手按照之前比赛的成绩进行排序，然后从高到底依次把1~n分分配给他们，并求出之后的最大值，显然这就是总冠军的最低得分。因此我们给每位选手的“之前成绩”加上n分，大于等于总冠军最低得分就有可能夺冠。
+
+代码如下
+
+```c
+#include <stdio.h>
+typedef int T;
+int cmpInt(T a, T b) { return a > b; }
+
+void quickSort(T *array, int (*compare)(T a, T b), int l, int r) {
+    int i, j;
+    T mid;
+    if (r - l < 2) return;
+    for (i = l, j = r - 1, mid = array[l]; i < j;) {
+        while (compare(mid, array[j]) && i < j) j--;
+        if (i < j) array[i++] = array[j];
+        while (compare(array[i], mid) && i < j) i++;
+        if (i < j) array[j--] = array[i];
+    }
+    array[i] = mid;
+    quickSort(array, compare, l, i);
+    quickSort(array, compare, i + 1, r);
+}
+
+int pt[300007], n;
+int maxn, max, ans;
+int maxPoint;
+
+int main() {
+    int i;
+    scanf("%d", &n);
+    for (i = 0; i < n; i++) {
+        scanf("%d", pt + i);
+    }
+    quickSort(pt, cmpInt, 0, n);
+    for (i = 0; i < n; i++)
+        if (maxPoint < pt[i] + i + 1) maxPoint = pt[i] + i + 1;
+    for (i = 0; i < n; i++) {
+        if (pt[i] + n >= maxPoint) ans++;
+    }
+    printf("%d", ans);
+    return 0;
+}
+```
