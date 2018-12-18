@@ -388,3 +388,175 @@ int main() {
     return 0;
 }
 ```
+
+```
+
+## J 等差数列
+
+**解题思路**：一个等差数列显然是**有序**的，因此我们可以先将输入数据排序，然后依次对相邻两项做差，判断是否是等差数列。
+
+代码如下（使用了快速排序算法，可以用qsort代替）
+
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+typedef int T;
+int cmpInt(T a, T b) { return a < b; }
+int cmp(const void *a,const void *b){
+    return *(int*)a - *(int*)b;
+}
+
+void quickSort(T *array, int (*compare)(T a, T b), int l, int r) {
+    int i, j;
+    T mid;
+    if (r - l < 2) return;
+    for (i = l, j = r - 1, mid = array[l]; i < j;) {
+        while (compare(mid, array[j]) && i < j) j--;
+        if (i < j) array[i++] = array[j];
+        while (compare(array[i], mid) && i < j) i++;
+        if (i < j) array[j--] = array[i];
+    }
+    array[i] = mid;
+    quickSort(array, compare, l, i);
+    quickSort(array, compare, i + 1, r);
+}
+int n, num[(int)1e6 + 5];
+int i, gap;
+int main() {
+    scanf("%d", &n);
+    if (n == 1 || n == 2) {
+        printf("Yes");
+        return 0;
+    }
+    for (i = 0; i < n; i++) scanf("%d", num + i);
+    //quickSort(num, cmpInt, 0, n);
+    qsort(num,n,sizeof(int),cmp);
+    gap = num[1] - num[0];
+    for (i = 2; i < n; i++)
+        if (num[i] - num[i - 1] != gap) {
+            printf("NO");
+            return 0;
+        }
+
+    printf("Yes");
+    return 0;
+}
+```
+
+---
+
+## K lx的难题
+
+> 这种类型的题目被称为“[相邻最大插值](https://www.baidu.com/s?wd=%E7%9B%B8%E9%82%BB%E6%9C%80%E5%A4%A7%E5%B7%AE%E5%80%BC&ie=UTF-8)”，在知乎上有一个漫画版的详解：[漫画算法：无序数组排序后的最大相邻差值](https://zhuanlan.zhihu.com/p/32434125)
+
+**解题思路**：本题其实与B lx的简单题思路相同，即排序后做差求最大值即可。
+
+**坑点**：
+
+* 多组输入
+* 数据规模
+  * 由于数据规模过大，AC本题需要使用O(n)的算法（甚至还卡常数！过分！）
+  * 一种考虑是使用桶排序，关于桶排序算法可以[看这里(Wikipedia)](https://zh.wikipedia.org/wiki/%E6%A1%B6%E6%8E%92%E5%BA%8F)或[百度百科]()
+  * 将桶数设为n+1，那么排序完成后一定会出现**至少一个**空桶，并且由于桶排序的特性，空桶不会出现在两端。
+  * 显而易见，相差最大的两个数，一定会出现在空桶的两侧。因此，对每个空桶分别找其左侧的最大值，和右侧的最大值，即可找到一对候选。
+    * 同时我们可以发现每个桶**只需维护最大值和最小值**即可。
+  * 比较每一对候选即可得到最大差值。
+  * **！！本题卡常数：请使用int类型数组，long long类型会导致TLE！！**
+
+```c
+#include <stdio.h>
+#define MAXN (int)1e6 + 5
+unsigned int m_max, m_min, size, m_array[MAXN];
+unsigned int maxn[MAXN], minn[MAXN];
+long long ans, gap;
+unsigned int i, j, range, bucketnum;
+int Sort() {
+    if (m_max == m_min)
+        return 1;
+    bucketnum = (m_max - m_min) / (size + 1);
+    range = (m_max - m_min) / bucketnum;
+    for (i = 0; i <= range; i++)
+        maxn[i] = 0, minn[i] = 0xffffffff;
+    unsigned int i, g;
+    for (i = 0; i < size; i++) {
+        g = (m_array[i] - m_min) / bucketnum;
+        if (maxn[g] < m_array[i])
+            maxn[g] = m_array[i];
+        if (minn[g] > m_array[i])
+            minn[g] = m_array[i];
+    }
+    return 0;
+}
+int main() {
+    int inputtmp;
+    // printf("%u\n",0xffffffff);
+    while (scanf("%d", &size) > 0) {
+        m_max = 0, m_min = 0xffffffff;
+        ans = gap = 0;
+        for (i = 0; i < size; i++) {
+            scanf("%d", &inputtmp);
+            // printf("%lld\n",inputtmp);
+            m_array[i] = (unsigned int)(inputtmp ^ 0x80000000);
+            m_min = m_min < m_array[i] ? m_min : m_array[i];
+            m_max = m_max > m_array[i] ? m_max : m_array[i];
+        }
+        // printf("%u,%u\n",m_min,m_max);
+        if (Sort()) {
+            printf("0\n");
+            continue;
+        }
+        for (i = 1; i <= range; i++) {
+            if (maxn[i] < minn[i]) {
+                j = i;
+                while (j < range && maxn[j] < minn[j])
+                    j++;
+                gap = minn[j] - maxn[i - 1];
+                i = j;
+            }
+            if (gap > ans)
+                ans = gap;
+        }
+        printf("%lld\n", ans);
+    }
+    return 0;
+}
+```
+
+---
+
+## L lx学长做乘法2
+
+> 出题人给出的参考资料
+> [IEEE 754 - Wikipeida](https://zh.wikipedia.org/wiki/IEEE_754) (浮点格式标准文档)
+> [你应该知道的浮点数基础知识](https://www.cnblogs.com/cenalulu/p/4397360.html)
+
+**解题思路**：直接看相关标准文档[IEEE 754](https://zh.wikipedia.org/wiki/IEEE_754)~~并手动实现浮点格式读写和乘法~~ 并利用位运算以及联合体（union）取巧解决。
+* 预备知识：[联合体union](https://zh.cppreference.com/w/cpp/language/union)  其实只需要知道联合体内部的多个变量共用同一块内存即可。
+* 读入：给出的输入是一个float类型浮点数的内存表示，我们可以用一个int类型读入这个数，来保证实际存在内存中的数据与输入一致
+* 分段：根据文档，float在内存中有三段：符号位sig，指数段exp，有效数字段fraction，可以通过位运算取出
+* 判断是否合法：根据相关规则判断是否合法即可。NaN的特征：指数段二进制全为1，有效数字段非0。
+* 浮点乘法：由于联合体中的int类型a和float类型b共用内存，因此直接对b进行乘法操作即可。
+* 输出：要求输出内存表示，仍然通过int类型输出为16进制。
+
+代码如下
+
+```c
+#include <stdio.h>
+
+union num {
+    int a;
+    float b;
+};
+int main() {
+    int sig, exp, fra;
+    union num tmp;
+    scanf("%x", &tmp.a);
+    sig = (tmp.a & (0x80000000)) >> 31;
+    exp = (tmp.a & (0x7f800000)) >> 23;
+    fra = (tmp.a & (0x007fffff));
+    if (!(exp == 0xff && fra)) tmp.b *= 2;
+    printf("%#x", tmp.a);
+    return 0;
+}
+```
