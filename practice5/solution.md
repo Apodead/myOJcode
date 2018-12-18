@@ -130,4 +130,133 @@ int main() {
     return 0;
 }
 ```
+---
 
+## C login 走迷宫
+
+**题意**：从矩形左上角顺时针螺旋形向中心前进，到达指定位置需要几步。
+
+**解题思路**：本题可以使用模拟的方式解决，但是直接模拟难免超时，因此应对模拟进行一定的优化。
+
+下面提供一种思路：
+* 假设一个n行m列的矩形，目标在a行b列，设所需步数为$f(n,m,a,b)$。
+* 如果a=1，那么所需步数显然为b-1；
+* 如果目标位置不在第一行，那么我们先走m步，然后将矩形逆时针旋转90°之后，很容易发现问题变成了更小的一种情况：
+  * m行n-1列的矩形，目标位于m-b+1行a-1列,即$f(m,n-1,m-b+1,a-1)$
+* 因此，我们可以得到
+
+$$
+f(n,m,a,b)=\left\{
+\begin{aligned}
+&b-1,    & a=1, \\
+&f(m,n-1,m-b+1,a-1)+m, &a \neq 1
+\end{aligned}
+\right.
+
+$$
+
+代码如下。注意，出于优化目的，此代码中尾递归改为循环。将注释取消即可改为使用递归的版本。
+
+```c
+#include <stdio.h>
+
+long long solve(int n, int m, int p, int q) {
+    long long ans = 0;
+    int nn, mm, pp, qq;
+    // if(p==1)
+    // return q;
+    // return solve(m,n-1,m-q+1,p-1)+n;
+    while (p != 1) {
+        ans += m;
+        nn = n, mm = m, pp = p, qq = q;
+        n = mm, m = nn - 1, p = mm - qq + 1, q = pp - 1;
+    }
+    ans += q;
+    return ans;
+}
+int main() {
+    int m, n, p, q;
+    scanf("%d%d%d%d", &n, &m, &p, &q);
+    printf("%lld", solve(n, m, p, q));
+    return 0;
+}
+```
+
+---
+
+## D 悠唯的复读序列
+
+**解题思路**：由题意显然有
+
+$$
+\begin{aligned}
+f[1]&=f[2]=f[3]=1,\\
+f[i]&=(f[i-2]+f[i-3])\mod 100000007
+\end{aligned}
+$$
+
+循环求出即可。不使用递归主要是因为递归层数过多可能导致爆栈。
+代码如下
+
+```c
+#include<stdio.h>
+int n;
+int in[105];
+long long f[500005];
+int i,j;
+int main(){
+    scanf("%d",&n);
+    for(i=0;i<n;i++)
+        scanf("%d",in+i),j=in[i]>j?in[i]:j;
+    for(f[1]=f[2]=f[3]=1,i=4;i<=j;i++)
+        f[i]=f[i-2]+f[i-3],f[i]%=100000007;
+    for(i=0;i<n;i++)
+        printf("%lld\n",f[in[i]]);
+    return 0;
+}
+```
+
+---
+
+## E Anagrams
+
+**解题思路**：分别对两个字符串进行排序，然后判断是否相同即可。
+
+代码如下。(可以使用qsort以避免自行编写排序函数)
+
+```c
+#include<stdio.h>
+#include<string.h>
+typedef char T;
+int cmpnum(T a,T b){return a>b;}
+
+void quickSort(T* array, int(*compare)(T a,T b), int l, int r){
+    int i,j;
+    T mid;
+    if(r-l<2)
+        return;
+    for(i=l,j=r-1,mid=array[l];i<j;){
+        while(!compare(mid,array[j])&&i<j)j--;
+        array[i]=array[j];
+        while(!compare(array[i],mid)&&i<j)i++;
+        array[j]=array[i];
+    }
+    array[i]=mid;
+    quickSort(array,compare,l,i);
+    quickSort(array,compare,i+1,r);
+}
+
+char p[255],q[255];
+int main(){
+    //scanf("%s\n%s",p,q);
+    fgets(p,200,stdin);
+    fgets(q,200,stdin);
+    quickSort(p,cmpnum,0,strlen(p));
+    quickSort(q,cmpnum,0,strlen(q));
+    if(strcmp(p,q))
+        printf("NIE");
+    else 
+        printf("TAK");
+    return 0;
+}
+```

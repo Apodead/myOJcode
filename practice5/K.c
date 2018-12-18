@@ -5,19 +5,15 @@ unsigned int maxn[MAXN], minn[MAXN];
 long long ans, gap;
 unsigned int i, j, range, bucketnum;
 int Sort() {
-    if (m_max == m_min)
-        return 1;
+    if (m_max == m_min) return 1;
     bucketnum = (m_max - m_min) / (size + 1);
     range = (m_max - m_min) / bucketnum;
-    for (i = 0; i <= range; i++)
-        maxn[i] = 0, minn[i] = 0xffffffff;
+    for (i = 0; i <= range; i++) maxn[i] = 0, minn[i] = 0xffffffff;
     unsigned int i, g;
     for (i = 0; i < size; i++) {
         g = (m_array[i] - m_min) / bucketnum;
-        if (maxn[g] < m_array[i])
-            maxn[g] = m_array[i];
-        if (minn[g] > m_array[i])
-            minn[g] = m_array[i];
+        if (maxn[g] < m_array[i]) maxn[g] = m_array[i];
+        if (minn[g] > m_array[i]) minn[g] = m_array[i];
     }
     return 0;
 }
@@ -42,13 +38,11 @@ int main() {
         for (i = 1; i <= range; i++) {
             if (maxn[i] < minn[i]) {
                 j = i;
-                while (j < range && maxn[j] < minn[j])
-                    j++;
+                while (j < range && maxn[j] < minn[j]) j++;
                 gap = minn[j] - maxn[i - 1];
                 i = j;
             }
-            if (gap > ans)
-                ans = gap;
+            if (gap > ans) ans = gap;
         }
         printf("%lld\n", ans);
     }
